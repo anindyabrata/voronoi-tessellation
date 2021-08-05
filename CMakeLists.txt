@@ -21,7 +21,7 @@ include_directories(external)
 
 
 
-add_executable(devmain app/devmain.cpp)
+add_executable(devmain app/devmain.cpp test/voronoi_viewable.cpp)
 
 target_include_directories(devmain PUBLIC ${GLFW_INCLUDE_DIRS}
 	${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
