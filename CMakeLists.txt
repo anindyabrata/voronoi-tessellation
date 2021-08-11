@@ -24,8 +24,8 @@ include_directories(external)
 add_executable(devmain app/devmain.cpp test/voronoi_viewable.cpp)
 
 target_include_directories(devmain PUBLIC ${GLFW_INCLUDE_DIRS}
-	${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
+	${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${CGAL_INCLUDE_DIRS})
 target_link_libraries(devmain ${GLFW_LIBRARIES} ${GLEW_LIBRARIES}
-	${OPENGL_LIBRARIES})
+	${OPENGL_LIBRARIES} ${CGAL_LIBRARY} ${GMP_LIBRARIES})
 
 
