@@ -14,14 +14,17 @@ namespace ogview{
 			init();
 		}
 		~SimulationViewer(){
-			term();
+			glfwTerminate();
 		}
 		void render(){
 			rend();
 		}
+		private:
 		VoronoiViewable vv;
+		GLFWwindow* window = NULL;
 		GLuint program;
 		GLuint VAO;
+		//linalg::aliases::float3
 		linalg::aliases::float4x4 transform = linalg::identity;
 		void initData()
 		{
@@ -84,7 +87,6 @@ namespace ogview{
 			glBindVertexArray(0);
 		}
 
-		GLFWwindow* window = NULL;
 		void init()
 		{
 			if(!glfwInit())
@@ -155,6 +157,7 @@ namespace ogview{
 				glUniformMatrix4fv(mulmatid, 1, GL_FALSE, tr);
 
 				// sort faces by distance from camera
+				//
 
 				// draw faces on screen
 				glBindVertexArray(VAO);
@@ -166,9 +169,6 @@ namespace ogview{
 				glfwPollEvents();
 			}
 
-		}
-		void term(){
-			glfwTerminate();
 		}
 	};
 }
