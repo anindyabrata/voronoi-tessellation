@@ -28,7 +28,8 @@ namespace ogview{
 		auto faces = vor.get_unique_faces();
 		for(auto face: faces){
 			std::vector<unsigned int> f;
-			for(int i = 0; i < face.size(); ++i) f.push_back(face[i] * 3);
+			// for(int i = 0; i < face.size(); ++i) f.push_back(face[i] * 3);
+			for(int i = 0; i < face.size(); ++i) f.push_back(face[i]);
 			triangulate(ret, f);
 		}
 		return ret;

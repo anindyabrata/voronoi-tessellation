@@ -49,7 +49,7 @@ namespace ogview{
 				 out vec4 FragColor;
 				 void main()
 				 {
-				 FragColor = vec4(0.6, 1.0, 1.0, 0.7);
+				 FragColor = vec4(0.6, 1.0, 1.0, 0.2);
 				 }
 				);
 
@@ -193,7 +193,7 @@ namespace ogview{
 				glBufferData(GL_ARRAY_BUFFER, sizeof(float) * dverts.size(), &dverts[0], GL_DYNAMIC_DRAW);
 				// glBufferSubData
 				auto dfaces = vv.getCompletedCellTris();
-				glDrawElements(GL_TRIANGLES, 4 * 3, GL_UNSIGNED_INT, &dfaces[0]);
+				glDrawElements(GL_TRIANGLES, dfaces.size() * 3, GL_UNSIGNED_INT, &dfaces[0]);
 				glBindVertexArray(0);
 
 				glfwSwapBuffers(window);
