@@ -11,37 +11,28 @@ namespace fsl3d{
 		std::vector<std::vector<std::vector<int>>> cells;
 		std::vector<vertex_type> vertices;
 		for(int mask = 8; mask--; ){
-			//vertex_type vert = vor.bb_min;
 			vertex_type vert(
-					(mask & 1)? vor.bb_min.x(): vor.bb_max.x(),
-					(mask & 2)? vor.bb_min.y(): vor.bb_max.y(),
-					(mask & 4)? vor.bb_min.z(): vor.bb_max.z());
-			//for(int i = 0; i < 3; ++i) if(mask & (1 << i)) vert[i] = vor.bb_max[i];
+					(mask & 1)? vor.bb_max: vor.bb_min,
+					(mask & 2)? vor.bb_max: vor.bb_min,
+					(mask & 4)? vor.bb_max: vor.bb_min);
 			vertices.push_back(vert);
 		}
 		// initialize each cell as faces of entire bounding box
 		for(int site_i = 0; site_i <= site_list.size(); ++site_i){
 			std::vector<std::vector<int>> cell;
-			for(int fi = 0; fi < 6; ++fi){
-				auto m = fi / 3? vor.bb_max: vor.bb_min;
-				int i = fi % 3;
-				std::vector<int> face;
-				for(int j = 0; j < vertices.size(); ++j) if(vertices[j][i] == m[i]) face.push_back(j);
-				for(int j = 1; j < face.size() - 1; ++j) for(int k = j; k < face.size(); ++k) {
-					auto vl = vertices[face[j-1]], vr = vertices[face[k]];
-					if(vl[0] == vr[0] || vl[1] == vr[1]){
-						std::swap(face[j], face[k]);
-						break;
-					}
-				}
-				cell.push_back(face);
-			}
+			cell.push_back({0,1,3,2}); // +z
+			cell.push_back({4,5,7,6}); // -z
+			cell.push_back({0,1,5,4}); // +y
+			cell.push_back({2,3,7,6}); // -y
+			cell.push_back({0,2,6,4}); // +x
+			cell.push_back({1,3,7,5}); // -x
 			cells.push_back(cell);
 		}
 		// for each pair of sites 
 		//		find separating plane
 		//		reduce cells using plane
 		for(int i = 0; i < site_list.size(); ++i) for(int j = 0; j < site_list.size(); ++j) if(i != j){
+			break;
 			std::vector<std::vector<int>> cell;
 			auto old_cell = cells[i];
 			std::vector<int> new_face;
@@ -73,6 +64,7 @@ namespace fsl3d{
 					}
 				}
 				if(face.size() > 1 && face.front() == face.back()) face.pop_back();
+				if(face.size() > 0) cell.push_back(face);
 			}
 			if(new_face.size() > 1){
 				// sort newface
