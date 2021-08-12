@@ -52,10 +52,6 @@ namespace ogview{
 		}
 	}
 	void VoronoiViewable::scale_floats(std::vector<float> &vec){
-		float xl = vor.bb_min.x(), yl = vor.bb_min.y(), zl = vor.bb_min.z(),
-			  xr = vor.bb_max.x(), yr = vor.bb_max.y(), zr = vor.bb_max.z();
-		for(int i = 0; i < vec.size(); i += 3) vec[i] = ((vec[i] - xl) / xr) * (2 * boundary) - boundary;
-		for(int i = 1; i < vec.size(); i += 3) vec[i] = ((vec[i] - yl) / yr) * (2 * boundary) - boundary;
-		for(int i = 2; i < vec.size(); i += 3) vec[i] = ((vec[i] - zl) / zr) * (2 * boundary) - boundary;
+		for(int i = 0; i < vec.size(); ++i) vec[i] = ((vec[i] - vor.bb_min) / (vor.bb_max - vor.bb_min)) * (2 * boundary) - boundary;
 	}
 }

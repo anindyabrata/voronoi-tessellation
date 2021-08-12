@@ -8,29 +8,19 @@
 
 namespace fsl3d{
 	class Voronoi{
-		// 
-		// Get site vertices
-		// Get vertices describing cells
-		// Get all unique faces
-		//		Faces are vectors of vertices in connected order (not tris)
-		// Get face indices describing particular cells
+		// TODO: unique vertices/planes using site/boundary affiliation
 	public:
 		Voronoi(){}
 		Voronoi(const std::vector<vertex_type> &site_verts){
-			for(auto v: site_verts) site_vertices.push_back(v);
-			bb_min = bb_max = site_verts[0];
+			bb_min = bb_max = (site_verts.size() > 0)? site_verts[0][0]: 0;
 			for(auto v: site_verts){
-				K::FT x, y, z;
-				x = v.x() < bb_min.x()? v.x(): bb_min.x();
-				y = v.y() < bb_min.y()? v.y(): bb_min.y();
-				z = v.z() < bb_min.z()? v.z(): bb_min.z();
-				bb_min = vertex_type(x, y, z);
-				x = v.x() > bb_max.x()? v.x(): bb_max.x();
-				y = v.y() > bb_max.y()? v.y(): bb_max.y();
-				z = v.z() > bb_max.z()? v.z(): bb_max.z();
-				bb_max = vertex_type(x, y, z);
+				site_vertices.push_back(v);
+				for(int i = 0; i < 3; ++i){
+					if(v[i] < bb_min) bb_min = v[i];
+					if(v[i] > bb_max) bb_max = v[i];
+				}
 			}
-			CGAL::Vector_3<K> offset(1, 1, 1);
+			scalar_type offset = (bb_max - bb_min) * 10 / 100;
 			bb_min -= offset;
 			bb_max += offset;
 		}
@@ -50,7 +40,7 @@ namespace fsl3d{
 			return ret;
 		}
 	// private: // commented out for testing
-		vertex_type bb_min, bb_max;
+		scalar_type bb_min, bb_max;
 		std::vector<vertex_type> site_vertices;
 		std::vector<vertex_type> cell_vertices;
 		std::vector<std::vector<int>> faces;
