@@ -2,12 +2,14 @@
 #include <GLFW/glfw3.h>
 
 #include <vector>
+#include <array>
 #include <iostream>
 #include "ogutils.cpp"
 #include "linalg.h"
 #include "ogview/voronoi_viewable.hpp"
 
 namespace ogview{
+	enum FaceGroup {completed, incomplete, beachline};
 	class SimulationViewer{
 		public:
 		SimulationViewer(VoronoiViewable& _vv):vv(_vv){
@@ -26,13 +28,13 @@ namespace ogview{
 		private:
 		VoronoiViewable vv;
 		GLFWwindow* window = NULL;
-		GLuint program;
-		GLuint VAO, dVAO, dvertex_buffer;
-		//linalg::aliases::float3
+		bool wireframe_mode = false;
+		GLuint cell_tri_prog, cell_edge_prog;
+		GLuint VAO, vertex_buffer;
 		linalg::aliases::float4x4 transform = linalg::identity;
 		void initData()
 		{
-			const char* vert = GLSL
+			const char* vert_shader = GLSL
 				(
 				 450 core,
 				 layout(location = 0) in vec3 position;
@@ -43,7 +45,7 @@ namespace ogview{
 				 }
 				);
 
-			const char* frag = GLSL
+			const char* cell_tri_frag_shader = GLSL
 				(
 				 450 core,
 				 out vec4 FragColor;
@@ -53,7 +55,18 @@ namespace ogview{
 				 }
 				);
 
-			program = LoadProgram(vert, NULL, frag);
+			const char* cell_edge_frag_shader = GLSL
+				(
+				 450 core,
+				 out vec4 FragColor;
+				 void main()
+				 {
+				 FragColor = vec4(0.3, 0.3, 0.9, 0.9);
+				 }
+				);
+
+			cell_tri_prog = LoadProgram(vert_shader, NULL, cell_tri_frag_shader);
+			cell_edge_prog = LoadProgram(vert_shader, NULL, cell_edge_frag_shader);
 
 			float data[] =
 			{
@@ -67,43 +80,16 @@ namespace ogview{
 			};
 
 			// dynamic VAO setup
-			glGenVertexArrays(1, &dVAO);
-			glBindVertexArray(dVAO);
-			glGenBuffers(1, &dvertex_buffer);
-			glBindBuffer(GL_ARRAY_BUFFER, dvertex_buffer);
+			glGenVertexArrays(1, &VAO);
+			glBindVertexArray(VAO);
+			glGenBuffers(1, &vertex_buffer);
+			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_DYNAMIC_DRAW);
 			//glGenBuffers(1, &dindex_buffer);
 			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dindex_buffer);
 			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_DYNAMIC_DRAW);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-			glBindVertexArray(0);
-
-
-			// VAO setup
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
-
-			GLuint vertex_buffer = 0;
-			glGenBuffers(1, &vertex_buffer);
-			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-			auto static_vertices = vv.getStaticVertices();
-			float *svs = &static_vertices[0];
-			//glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-			glBufferData(GL_ARRAY_BUFFER, static_vertices.size() * sizeof(float), svs, GL_STATIC_DRAW);
-
-			GLuint index_buffer = 0;
-			glGenBuffers(1, &index_buffer);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-			auto cell_indices = vv.getCompletedCellTris();
-			unsigned int *indices = &cell_indices[0];
-			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, cell_indices.size() * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
-			glEnableVertexAttribArray(0);
-
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
 			glBindVertexArray(0);
 		}
 
@@ -137,6 +123,7 @@ namespace ogview{
 				std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
 			}
 			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
 
 			// https://andersriggelsen.dk/glblendfunc.php
 			glEnable(GL_BLEND);
@@ -161,43 +148,67 @@ namespace ogview{
 			pos = linalg::mul(linalg::inverse(transform), pos);
 			return pos;
 		}
+		void useProg(GLuint prog){
+				glUseProgram(prog);
+
+				// translate + rotate + scale matrix
+				unsigned int mulmatid = glGetUniformLocation(prog, "mulmat");
+				float tr[4*4]; for(int r = 4; r--;) for(int c = 4; c--; ) tr[r * 4 + c] = transform[r][c];
+				glUniformMatrix4fv(mulmatid, 1, GL_FALSE, tr);
+		}
 		void rend(){
 			while(!glfwWindowShouldClose(window))
 			{
 				glClearColor( 0.1, 0.2, 0.12, 1.0 );
+				glClearDepth(1.0);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				glfwPollEvents();
 				handleKeyboardEvents();
 
-				glUseProgram(program);
-
-				// translate + rotate + scale matrix
-				unsigned int mulmatid = glGetUniformLocation(program, "mulmat");
-				float tr[4*4]; for(int r = 4; r--;) for(int c = 4; c--; ) tr[r * 4 + c] = transform[r][c];
-				glUniformMatrix4fv(mulmatid, 1, GL_FALSE, tr);
-
-				// sort faces by distance from camera
-				//
-
-				// draw default faces on screen
-				// glBindVertexArray(VAO);
-				// glDrawElements(GL_TRIANGLES, 4 * 3, GL_UNSIGNED_INT, 0);
-				// glBindVertexArray(0);
-
 				// Dynamic draw
-				glBindVertexArray(dVAO);
-				glBindBuffer(GL_ARRAY_BUFFER, dvertex_buffer);
-				// auto dverts = vv.getStaticVertices();
-				auto dverts = vv.getDynamicVertices();
-				glBufferData(GL_ARRAY_BUFFER, sizeof(float) * dverts.size(), &dverts[0], GL_DYNAMIC_DRAW);
-				// glBufferSubData
+				glBindVertexArray(VAO);
+				glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+				auto vertices = vv.getDynamicVertices();
+				glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_DYNAMIC_DRAW);
+				// glBufferSubData?
 				auto dfaces = vv.getCompletedCellTris();
-				glDrawElements(GL_TRIANGLES, dfaces.size() * 3, GL_UNSIGNED_INT, &dfaces[0]);
+
+				// update dynamic vertices
+				// load faces (indices, face groups)
+				std::vector<std::array<unsigned int, 3>> faces;
+				for(int i = 0; i < dfaces.size(); i += 3) faces.push_back({dfaces[i], dfaces[i+1], dfaces[i+2]});
+				// sort faces
+				linalg::aliases::float4 cpos = getTransformedCameraPos();
+				std::vector<float> dist;
+				for(auto face: faces){
+					float d = 0;
+					for(int i = 0; i < 3; ++i) {
+						int vi = face[i];
+						float vf, dd = 0;
+						for(int j = 0; j < 3; ++j){
+							vf = vertices[vi * 3 + j] - cpos[j];
+							vf *= vf;
+							dd += vf;
+						}
+						if(dd > d) d = dd;
+					}
+					dist.push_back(d);
+				}
+				std::vector<int> face_order; for(int i = 0; i < faces.size(); ++i) face_order.push_back(i);
+				auto cmp = [dist](const int a, const int b) -> bool { return dist[a] > dist[b]; };
+				std::sort(face_order.begin(), face_order.end(), cmp);
+				// show faces (if(face_group == 2) 
+				for(int fi: face_order){
+					useProg(cell_tri_prog);
+					if(!wireframe_mode) glDrawElements(GL_TRIANGLES, 1 * 3, GL_UNSIGNED_INT, &faces[fi]);
+					useProg(cell_edge_prog);
+					glDrawElements(GL_LINES, 1 * 3, GL_UNSIGNED_INT, &faces[fi]);
+				}
 				glBindVertexArray(0);
 
+				glFlush();
 				glfwSwapBuffers(window);
-
 			}
 
 		}
