@@ -20,7 +20,8 @@ namespace fsl3d{
 					if(v[i] > bb_max) bb_max = v[i];
 				}
 			}
-			scalar_type offset = (bb_max - bb_min) * 10 / 100;
+			scalar_type offset = (bb_max - bb_min);
+			offset = offset? offset * 10 / 100: 1;
 			bb_min -= offset;
 			bb_max += offset;
 		}
