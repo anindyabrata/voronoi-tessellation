@@ -10,6 +10,6 @@ int main(int argc, char** argv)
 	ogview::VoronoiViewable vv(voronoi);
 	ogview::SimulationViewer sv(vv);
 	sv.render();
-	//fsl3d::utils::write_voronoi(voronoi);
+	fsl3d::utils::write_voronoi(voronoi);
 	return 0;
 }
