@@ -11,6 +11,10 @@ namespace ogview{
 	class SimulationViewer{
 		public:
 		SimulationViewer(VoronoiViewable& _vv):vv(_vv){
+			auto dverts = vv.getDynamicVertices();
+			for(int i = 0; i < dverts.size(); i += 3) std::cout << dverts[i] << " " << dverts[i+1] << " " << dverts[i+2] << std::endl;
+			auto dfaces = vv.getCompletedCellTris();
+			for(int i = 0; i < dfaces.size(); ++i) std::cout << dfaces[i] << " "; std::cout << std::endl;
 			init();
 		}
 		~SimulationViewer(){
@@ -23,7 +27,7 @@ namespace ogview{
 		VoronoiViewable vv;
 		GLFWwindow* window = NULL;
 		GLuint program;
-		GLuint VAO;
+		GLuint VAO, dVAO, dvertex_buffer;
 		//linalg::aliases::float3
 		linalg::aliases::float4x4 transform = linalg::identity;
 		void initData()
@@ -51,18 +55,38 @@ namespace ogview{
 
 			program = LoadProgram(vert, NULL, frag);
 
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
-
-			GLuint vertex_buffer = 0;
-			glGenBuffers(1, &vertex_buffer);
-			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 			float data[] =
 			{
 				0.0f,0.8f,0,
 				-0.8f, 0.0f,0,
 				0.8f,0.0f,0
 			};
+			unsigned int indexes[] =
+			{
+				0,1,2
+			};
+
+			// dynamic VAO setup
+			glGenVertexArrays(1, &dVAO);
+			glBindVertexArray(dVAO);
+			glGenBuffers(1, &dvertex_buffer);
+			glBindBuffer(GL_ARRAY_BUFFER, dvertex_buffer);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_DYNAMIC_DRAW);
+			//glGenBuffers(1, &dindex_buffer);
+			//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dindex_buffer);
+			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_DYNAMIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			glBindVertexArray(0);
+
+
+			// VAO setup
+			glGenVertexArrays(1, &VAO);
+			glBindVertexArray(VAO);
+
+			GLuint vertex_buffer = 0;
+			glGenBuffers(1, &vertex_buffer);
+			glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 			auto static_vertices = vv.getStaticVertices();
 			float *svs = &static_vertices[0];
 			//glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
@@ -71,10 +95,6 @@ namespace ogview{
 			GLuint index_buffer = 0;
 			glGenBuffers(1, &index_buffer);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-			unsigned int indexes[] =
-			{
-				0,1,2
-			};
 			auto cell_indices = vv.getCompletedCellTris();
 			unsigned int *indices = &cell_indices[0];
 			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
@@ -147,6 +167,7 @@ namespace ogview{
 				glClearColor( 0.1, 0.2, 0.12, 1.0 );
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+				glfwPollEvents();
 				handleKeyboardEvents();
 
 				glUseProgram(program);
@@ -159,14 +180,24 @@ namespace ogview{
 				// sort faces by distance from camera
 				//
 
-				// draw faces on screen
-				glBindVertexArray(VAO);
-				glDrawElements(GL_TRIANGLES, 4 * 3, GL_UNSIGNED_INT, 0);
+				// draw default faces on screen
+				// glBindVertexArray(VAO);
+				// glDrawElements(GL_TRIANGLES, 4 * 3, GL_UNSIGNED_INT, 0);
+				// glBindVertexArray(0);
+
+				// Dynamic draw
+				glBindVertexArray(dVAO);
+				glBindBuffer(GL_ARRAY_BUFFER, dvertex_buffer);
+				// auto dverts = vv.getStaticVertices();
+				auto dverts = vv.getDynamicVertices();
+				glBufferData(GL_ARRAY_BUFFER, sizeof(float) * dverts.size(), &dverts[0], GL_DYNAMIC_DRAW);
+				// glBufferSubData
+				auto dfaces = vv.getCompletedCellTris();
+				glDrawElements(GL_TRIANGLES, 4 * 3, GL_UNSIGNED_INT, &dfaces[0]);
 				glBindVertexArray(0);
 
 				glfwSwapBuffers(window);
 
-				glfwPollEvents();
 			}
 
 		}

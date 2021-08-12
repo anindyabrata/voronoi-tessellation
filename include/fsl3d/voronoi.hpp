@@ -15,7 +15,7 @@ namespace fsl3d{
 		//		Faces are vectors of vertices in connected order (not tris)
 		// Get face indices describing particular cells
 	public:
-		Voronoi();
+		Voronoi(){}
 		Voronoi(const std::vector<vertex_type> &site_verts){
 			for(auto v: site_verts) site_vertices.push_back(v);
 			bb_min = bb_max = site_verts[0];
@@ -29,10 +29,6 @@ namespace fsl3d{
 				y = v.y() > bb_max.y()? v.y(): bb_max.y();
 				z = v.z() > bb_max.z()? v.z(): bb_max.z();
 				bb_max = vertex_type(x, y, z);
-				//for(int i = 0; i < 3; ++i){
-					//if(v[i] < bb_min[i]) bb_min[i] = v[i];
-					//if(v[i] > bb_max[i]) bb_max[i] = v[i];
-				//}
 			}
 			CGAL::Vector_3<K> offset(1, 1, 1);
 			bb_min -= offset;

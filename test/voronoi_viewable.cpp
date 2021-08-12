@@ -1,6 +1,8 @@
 #include "ogview/voronoi_viewable.hpp"
 
 namespace ogview{
+	VoronoiViewable::VoronoiViewable(){}
+	VoronoiViewable::VoronoiViewable(const fsl3d::Voronoi& voronoi){}
 	void VoronoiViewable::setProgress(double progress){
 	}
 	std::vector<float> VoronoiViewable::getStaticVertices(){
