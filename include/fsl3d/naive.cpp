@@ -32,7 +32,6 @@ namespace fsl3d{
 		//		find separating plane
 		//		reduce cells using plane
 		for(int i = 0; i < site_list.size(); ++i) for(int j = 0; j < site_list.size(); ++j) if(i != j){
-			break;
 			std::vector<std::vector<int>> cell;
 			auto old_cell = cells[i];
 			std::vector<int> new_face;
@@ -40,8 +39,8 @@ namespace fsl3d{
 				std::vector<int> face;
 				std::vector<bool> closer;
 				for(auto verti: old_face) closer.push_back(CGAL::has_smaller_distance_to_point(vertices[verti], site_list[i], site_list[j]));
-				for(int k = 0; k < face.size(); ++k){
-					int kr = (k + 1) % face.size();
+				for(int k = 0; k < old_face.size(); ++k){
+					int kr = (k + 1) % old_face.size();
 					if(closer[k] && closer[kr]){
 						if(0 == face.size()) face.push_back(old_face[k]);
 						face.push_back(old_face[kr]);
@@ -75,14 +74,10 @@ namespace fsl3d{
 				K::Point_2 md(twod[0]);
 				for(int k = 1; k < new_face.size(); ++k) mdx += twod[k].x(), mdy += twod[k].y();
 				mdx /= new_face.size(), mdy /= new_face.size();
-				//for(int k = 0; k < new_face.size(); ++k) twod[k] -= md;
 				std::vector<K::FT> slope;
 				for(int k = 0; k < new_face.size(); ++k) slope.push_back((twod[k].y() - mdy) / (twod[k].x() - mdx));
 				int sorder[new_face.size()];
 				for(int k = 0; k < new_face.size(); ++k) sorder[k] = k;
-				//struct{
-					//bool operator()(int a, int b) const{ return slope[a] < slope[b]; }
-				//} cmp;
 				auto cmp = [slope](const int a, const int b) -> bool { return slope[a] < slope[b]; };
 				std::sort(sorder, sorder + new_face.size(), cmp);
 				std::vector<int> sorted_new_face;
