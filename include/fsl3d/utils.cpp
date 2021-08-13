@@ -53,6 +53,16 @@ namespace fsl3d::utils{
 			}
 		}
 	}
+	bool are_voronois_equal(Voronoi &a, Voronoi &b){
+		if(a.site_count != b.site_count) return false;
+		for(int si = 0; si < a.site_count; ++si){
+			auto ac = a.cells[si], bc = b.cells[si];
+			if(ac.size() != bc.size()) return false;
+			for(int i = 0; i < ac.size(); ++i)
+				if(ac[i] >= 0 && ac[i] != bc[i]) return false;
+		}
+		return true;
+	}
 }
 
 
