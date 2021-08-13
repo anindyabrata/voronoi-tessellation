@@ -11,8 +11,8 @@ namespace ogview{
 	void VoronoiViewable::setBoundary(float bound){
 		boundary = bound;
 	}
-	std::vector<float> VoronoiViewable::getStaticVertices(){
-		auto original = vor.get_site_vertices();
+	std::vector<float> VoronoiViewable::getVertices(){
+		auto original = vor.get_vertices();
 		std::vector<float> ret;
 		for(int i = 0; i < original.size(); ++i) for(int j = 0; j < 3; ++j) ret.push_back((float)original[i][j]);
 		scale_floats(ret);
@@ -20,7 +20,7 @@ namespace ogview{
 	}
 	std::vector<unsigned int> VoronoiViewable::getSiteIndices(){
 		std::vector<unsigned int> ret;
-		for(int i = 0; i < vor.get_site_vertices().size(); i += 3) ret.push_back(i);
+		for(int i = 0; i < vor.site_count; ++i) ret.push_back(3 * (6 + i));
 		return ret;
 	}
 	std::vector<unsigned int> VoronoiViewable::getCompletedCellTris(){
@@ -28,17 +28,9 @@ namespace ogview{
 		auto faces = vor.get_unique_faces();
 		for(auto face: faces){
 			std::vector<unsigned int> f;
-			// for(int i = 0; i < face.size(); ++i) f.push_back(face[i] * 3);
 			for(int i = 0; i < face.size(); ++i) f.push_back(face[i]);
 			triangulate(ret, f);
 		}
-		return ret;
-	}
-	std::vector<float> VoronoiViewable::getDynamicVertices(){
-		auto original = vor.get_cell_vertices();
-		std::vector<float> ret;
-		for(int i = 0; i < original.size(); ++i) for(int j = 0; j < 3; ++j) ret.push_back((float)original[i][j]);
-		scale_floats(ret);
 		return ret;
 	}
 	std::vector<unsigned int> VoronoiViewable::getBeachlineTris(){

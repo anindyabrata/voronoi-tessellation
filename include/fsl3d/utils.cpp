@@ -35,7 +35,7 @@ namespace fsl3d::utils{
 		}
 		return ret;
 	}
-	void write_voronoi(const Voronoi &vor){
+	void write_voronoi(Voronoi &vor){
 		auto sites = vor.get_site_vertices();
 		std::cout << sites.size() << std::endl;							// S: number of sites
 		for(auto vert: sites) std::cout << vert << std::endl;			// site vertices
@@ -47,7 +47,8 @@ namespace fsl3d::utils{
 			std::cout << faces.size() << std::endl;						// F: number of faces in cell
 			for(auto face: faces){
 				std::cout << face.size();								// VF: number of vertices in face
-				for(auto index: face) std::cout << " " << index;		// index to vertex
+				for(auto index: face)
+					std::cout << " " << index - 6 - sites.size();		// index to vertex
 				std::cout << std::endl;
 			}
 		}
