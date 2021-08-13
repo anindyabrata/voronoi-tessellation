@@ -13,10 +13,10 @@ namespace ogview{
 	class SimulationViewer{
 		public:
 		SimulationViewer(VoronoiViewable& _vv):vv(_vv){
-			auto dverts = vv.getDynamicVertices();
-			for(int i = 0; i < dverts.size(); i += 3) std::cout << dverts[i] << " " << dverts[i+1] << " " << dverts[i+2] << std::endl;
-			auto dfaces = vv.getCompletedCellTris();
-			for(int i = 0; i < dfaces.size(); ++i) std::cout << dfaces[i] << " "; std::cout << std::endl;
+			// auto dverts = vv.getDynamicVertices();
+			// for(int i = 0; i < dverts.size(); i += 3) std::cout << dverts[i] << " " << dverts[i+1] << " " << dverts[i+2] << std::endl;
+			// auto dfaces = vv.getCompletedCellTris();
+			// for(int i = 0; i < dfaces.size(); ++i) std::cout << dfaces[i] << " "; std::cout << std::endl;
 			init();
 		}
 		~SimulationViewer(){
@@ -51,7 +51,7 @@ namespace ogview{
 				 out vec4 FragColor;
 				 void main()
 				 {
-				 FragColor = vec4(0.6, 1.0, 1.0, 0.2);
+				 FragColor = vec4(0.6, 1.0, 1.0, 0.1);
 				 }
 				);
 
@@ -103,7 +103,7 @@ namespace ogview{
 			glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-			window = glfwCreateWindow(640, 480, "Simulation window", NULL, NULL);
+			window = glfwCreateWindow(800, 800, "Simulation window", NULL, NULL);
 			if(!window)
 			{
 				std::cerr << "Error creating window" << std::endl;
@@ -122,8 +122,10 @@ namespace ogview{
 				std::cerr << "Glew init failed!" << std::endl;
 				std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
 			}
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LEQUAL);
+			// glEnable(GL_DEPTH_TEST);
+			// glEnable(GL_MULTISAMPLE_ARB);
+			// glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
+			// glDepthFunc(GL_LEQUAL);
 
 			// https://andersriggelsen.dk/glblendfunc.php
 			glEnable(GL_BLEND);
@@ -132,16 +134,22 @@ namespace ogview{
 
 			initData();
 		}
+		float rtx = 0, rty = 0, rtz = 0;
 		void handleKeyboardEvents(){
-			float rotation_speed = 0.001;
+			float rotation_speed = 0.002;
 			if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 				glfwSetWindowShouldClose(window, true);
 			if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
-				transform = linalg::mul(linalg::rotation_matrix<float>({1, 0, 0, rotation_speed}), transform);
+				rtx += rotation_speed;
 			if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-				transform = linalg::mul(linalg::rotation_matrix<float>({0, 1, 0, rotation_speed}), transform);
+				rty += rotation_speed;
 			if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-				transform = linalg::mul(linalg::rotation_matrix<float>({0, 0, 1, rotation_speed}), transform);
+				rtz += rotation_speed;
+			// Apply rotation
+			transform = linalg::identity;
+			transform = linalg::mul(linalg::rotation_matrix<float>(linalg::rotation_quat({1, 0, 0}, rtx)), transform);
+			transform = linalg::mul(linalg::rotation_matrix<float>(linalg::rotation_quat({0, 1, 0}, rty)), transform);
+			transform = linalg::mul(linalg::rotation_matrix<float>(linalg::rotation_quat({0, 0, 1}, rtz)), transform);
 		}
 		linalg::aliases::float4 getTransformedCameraPos(){
 			linalg::aliases::float4 pos = {0, 0, -1, 1};
@@ -159,7 +167,8 @@ namespace ogview{
 		void rend(){
 			while(!glfwWindowShouldClose(window))
 			{
-				glClearColor( 0.1, 0.2, 0.12, 1.0 );
+				// glClearColor(0.1, 0.2, 0.12, 1.0);
+				glClearColor(0, 0, 0, 0);
 				glClearDepth(1.0);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -169,7 +178,7 @@ namespace ogview{
 				// Dynamic draw
 				glBindVertexArray(VAO);
 				glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-				auto vertices = vv.getDynamicVertices();
+				auto vertices = vv.getVertices();
 				glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_DYNAMIC_DRAW);
 				// glBufferSubData?
 				auto dfaces = vv.getCompletedCellTris();
