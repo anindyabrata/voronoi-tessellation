@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <iterator>
+#include <algorithm>
 #include <CGAL/Vector_3.h>
 #include <CGAL/squared_distance_3.h>
 #include "fsl3d/common.hpp"
@@ -16,8 +17,6 @@ namespace fsl3d::utils{
 		std::exit(EXIT_FAILURE);
 	}
 	bool p_equal(const vertex_type &a, const vertex_type &b){
-		// CGAL::Vector_3<K> v(a,b);
-		// return v.squared_length() < EPS * EPS;
 		return CGAL::squared_distance(a, b) < EPS * EPS;
 	}
 	std::vector<vertex_type> read_site_list(){
@@ -57,9 +56,12 @@ namespace fsl3d::utils{
 		if(a.site_count != b.site_count) return false;
 		for(int si = 0; si < a.site_count; ++si){
 			auto ac = a.cells[si], bc = b.cells[si];
+			std::sort(ac.begin(), ac.end());
+			std::sort(bc.begin(), bc.end());
 			if(ac.size() != bc.size()) return false;
 			for(int i = 0; i < ac.size(); ++i)
-				if(ac[i] >= 0 && ac[i] != bc[i]) return false;
+				if((ac[i] >= 0 || bc[i] >= 0) && ac[i] != bc[i])
+					return false;
 		}
 		return true;
 	}
