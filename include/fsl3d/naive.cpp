@@ -35,39 +35,9 @@ namespace fsl3d{
 			std::vector<int> new_face;
 			for(auto old_face_vert: old_cell){
 				auto fid = vor.to_fid(i, old_face_vert);
-				auto old_face = vor.faces[fid];
 				std::vector<int> face;
-				std::vector<bool> closer;
-				for(auto verti: old_face) closer.push_back(CGAL::has_smaller_distance_to_point(vor.vertices[verti], site_list[i], site_list[j]));
-				for(int k = 0; k < old_face.size(); ++k){
-					int kr = (k + 1) % old_face.size();
-					if(closer[k] && closer[kr]){
-						if(0 == face.size()) face.push_back(old_face[k]);
-						face.push_back(old_face[kr]);
-					}
-					else if(closer[k] || closer[kr]){
-						if(closer[k] && (!face.size() || face.back() != old_face[k])) face.push_back(old_face[k]);
-
-						// Calculate vertex
-						auto bplane = CGAL::bisector(site_list[i], site_list[j]);
-						K::Line_3 line(vor.vertices[old_face[k]], vor.vertices[old_face[kr]]);
-						auto calcres = CGAL::intersection(line, bplane);
-						vertex_type calcvert = *boost::get<vertex_type>(&*calcres);
-
-						// Add calculated vertex to vertices
-						vor.vertices.push_back(calcvert);
-
-						// Add index of calculated vertex to face
-						int ind = vor.vertices.size() - 1;
-						face.push_back(ind);
-
-						// Add index of calculated vertex to new_face
-						new_face.push_back(ind);
-						if(closer[kr]) face.push_back(old_face[kr]);
-					}
-				}
-				// Remove duplicate vertices
-				if(face.size() > 1 && face.front() == face.back()) face.pop_back();
+				auto intersect = vor.bisect_face(fid, i, j, face);
+				for(auto vi: intersect) new_face.push_back(vi);
 
 				// If face not completely outside cell, include in cell
 				if(face.size() > 0){
