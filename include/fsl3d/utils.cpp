@@ -47,7 +47,7 @@ namespace fsl3d::utils{
 			for(auto face: faces){
 				std::cout << face.size();								// VF: number of vertices in face
 				for(auto index: face)
-					std::cout << " " << index - 6 - sites.size();		// index to vertex
+					std::cout << " " << index - 8 - sites.size();		// index to vertex
 				std::cout << std::endl;
 			}
 		}
