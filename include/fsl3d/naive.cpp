@@ -46,7 +46,7 @@ namespace fsl3d{
 						face.push_back(old_face[kr]);
 					}
 					else if(closer[k] || closer[kr]){
-						if(closer[k]) face.push_back(old_face[k]);
+						if(closer[k] && (!face.size() || face.back() != old_face[k])) face.push_back(old_face[k]);
 
 						// Calculate vertex
 						auto bplane = CGAL::bisector(site_list[i], site_list[j]);
