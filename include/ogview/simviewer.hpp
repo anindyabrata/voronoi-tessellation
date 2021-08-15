@@ -14,11 +14,14 @@ namespace ogview{
 	class SimulationViewer{
 		public:
 		SimulationViewer(VoronoiViewable& _vv):vv(_vv){
+			// vv.setProgress(15);
 			// auto &dverts = vv.getVertices();
 			// for(int i = 0; i < dverts.size(); i += 3) std::cout << dverts[i] << " " << dverts[i+1] << " " << dverts[i+2] << std::endl;
 			// auto &dfaces = vv.getCells();
 			// assert(0 < dfaces.size());
 			// for(int i = 0; i < dfaces.size(); ++i) { for(int j = 0; j < dfaces[i].size(); ++j) std::cout << dfaces[i][j] << " "; std::cout << std::endl; }
+			// auto &sface = vv.getSweepline()[0];
+			// for(int i = 0; i < sface.size(); ++i) std::cout << sface[i] << " "; std::cout << std::endl;
 			init();
 		}
 		~SimulationViewer(){
@@ -173,6 +176,7 @@ namespace ogview{
 		}
 		float rtx = -0.3, rty = 0.2, rtz = 0;
 		bool ppressed = false, _0pressed = false, _1pressed = false;
+		bool wpressed = false;
 		void handleKeyboardEvents(){
 			// Press ESC to close window
 			if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -188,6 +192,11 @@ namespace ogview{
 			if (!_1pressed && glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 				playing = false, vv.setFullProgress();
 			_1pressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS;
+
+			// Handle wireframe mode
+			if (!wpressed && glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+				wireframe_mode = !wireframe_mode;
+			wpressed = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
 
 			// Handle rotation
 			float rotation_speed = 0.002;
@@ -237,7 +246,7 @@ namespace ogview{
 				glfwPollEvents();
 				handleKeyboardEvents();
 
-				if(playing && !(++tick & 31)) vv.increment();
+				if(playing && !(++tick & 63)) vv.increment();
 
 				// Dynamic draw
 				// Update dynamic vertices
@@ -287,17 +296,17 @@ namespace ogview{
 
 				for(auto &face: cellfaces){
 					useProg(cell_prog);
-					if(!wireframe_mode) glDrawElements(GL_TRIANGLE_STRIP, face.size(), GL_UNSIGNED_INT, face.data());
+					if(!wireframe_mode) glDrawElements(GL_TRIANGLE_FAN, face.size(), GL_UNSIGNED_INT, face.data());
 					useProg(edge_prog);
 					glDrawElements(GL_LINE_LOOP, face.size(), GL_UNSIGNED_INT, face.data());
 				}
 				for(auto &face: sweepfaces){
 					useProg(sweep_prog);
-					glDrawElements(GL_TRIANGLE_STRIP, face.size(), GL_UNSIGNED_INT, face.data());
+					glDrawElements(GL_TRIANGLE_FAN, face.size(), GL_UNSIGNED_INT, face.data());
 				}
 				for(auto &face: beachfaces){
 					useProg(beach_prog);
-					glDrawElements(GL_TRIANGLE_STRIP, face.size(), GL_UNSIGNED_INT, face.data());
+					glDrawElements(GL_TRIANGLE_FAN, face.size(), GL_UNSIGNED_INT, face.data());
 				}
 
 				// Render faces and edges
