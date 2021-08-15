@@ -69,6 +69,14 @@ namespace fsl3d{
 			if(a > b) std::swap(a,b);
 			return a * site_count + b;
 		}
+		void from_fid(int fid, int &a, int &b) const{
+			a = fid / site_count;
+			b = fid % site_count;
+			if(b < 0){
+				--a;
+				b += site_count;
+			}
+		}
 		void sort_face(int fid){
 			auto face = faces[fid];
 			
