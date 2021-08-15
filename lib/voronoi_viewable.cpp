@@ -42,7 +42,27 @@ namespace ogview{
 		}
 
 		// Precompute y values for beachline
-		// save in 2D grid
+		using K = CGAL::Cartesian<float>;
+		float b = boundary;
+		for(int ps = 1; ps < PSTEPS; ++ps) {
+			float y = (ps / (float)PSTEPS) * 2 * b - b;
+			for(int xs = 0; xs <= GSTEPS; ++xs) for(int zs = 0; zs <= GSTEPS; ++zs){
+				float x = (xs / (float)GSTEPS) * 2 * b - b;
+				float z = (zs / (float)GSTEPS) * 2 * b - b;
+				float ry = -b;
+				K::Point_3 tp(x, y, z);
+				K::Line_3 ln(tp, K::Point_3(x, y - 1, z));
+				for(int site = 0; site < site_count; ++site){
+					int si = 8 + 3 * site;
+					K::Point_3 sp(vverts[si], vverts[1 + si], vverts[2 + si]);
+					auto bplane = CGAL::bisector(tp, sp);
+					auto ires = CGAL::intersection(ln, bplane);
+					K::Point_3 ip = *boost::get<K::Point_3>(&*ires);
+					if(ip.y() > ry) ry = ip.y();
+				}
+				cbeach[ps][xs][zs] = ry;
+			}
+		}
 
 		setFullProgress();
 	}
@@ -71,7 +91,7 @@ namespace ogview{
 
 		// gen sweep
 		if(prog > 0 && prog < PSTEPS){
-			int si = vverts.size() / 3;
+			int si = rverts.size() / 3;
 			for(float v: {-b, y, -b, -b, y, b, b, y, b, b, y, -b}) rverts.push_back(v);
 			std::vector<unsigned int> rsv;
 			for(int i = 0; i < 4; ++i) rsv.push_back(si + i);
@@ -90,11 +110,20 @@ namespace ogview{
 
 		// gen beach
 		if(0 < prog && PSTEPS > prog){
-			// For every x,z pair, get highest y value bisector for cur_y and every site with y less than cur_y
+			int ivi = rverts.size();
+			for(int xs = 0; xs <= GSTEPS; ++xs) for(int zs = 0; zs <= GSTEPS; ++zs){
+				float x = (xs / (float)GSTEPS) * 2 * b - b;
+				float z = (zs / (float)GSTEPS) * 2 * b - b;
+				for(float v: {x, cbeach[prog][xs][zs], z}) rverts.push_back(v);
+			}
+			rbeach.clear();
+			for(int xs = 0; xs < GSTEPS; ++xs) for(int zs = 0; zs < GSTEPS; ++zs){
+				unsigned int r1 = ivi + xs * (1 + GSTEPS) + zs;
+				unsigned int r2 = r1 + 1 + GSTEPS;
+				rbeach.push_back({r1, r2, 1 + r1});
+				rbeach.push_back({r1, r2, 1 + r2});
+			}
 		}
-	}
-	void VoronoiViewable::setBoundary(float bound){
-		boundary = bound;
 	}
 	const std::vector<float>& VoronoiViewable::getVertices(){
 		return rverts;
