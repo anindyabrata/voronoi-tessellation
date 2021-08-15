@@ -25,7 +25,7 @@ namespace ogview{
 
 		// Save faces
 		vfaces = vor.get_unique_faces();
-		assert(0 < vfaces.size());
+
 		// Save face indices
 		vfinds = vor.get_unique_face_indices();
 
@@ -53,14 +53,14 @@ namespace ogview{
 		setProgress(0);
 	}
 	void VoronoiViewable::increment(){
-		setProgress((1 + progress) % PSTEPS);
+		setProgress((1 + progress) % (2 * PSTEPS));
 	}
 	void VoronoiViewable::setProgress(size_t prog){
 		if(prog == progress) return;
 		progress = prog;
 
 		float b = boundary;
-		float y = prog * 2 * b / PSTEPS - b;
+		float y = (prog / (float)PSTEPS) * 2 * b - b;
 
 		// gen verts
 		rverts = vverts;
@@ -72,14 +72,14 @@ namespace ogview{
 		// gen sweep
 		if(prog > 0 && prog < PSTEPS){
 			int si = vverts.size() / 3;
-			for(float v: {-b, y, -b, -b, y, b, b, y, b, b, y, -b}) vverts.push_back(v);
+			for(float v: {-b, y, -b, -b, y, b, b, y, b, b, y, -b}) rverts.push_back(v);
 			std::vector<unsigned int> rsv;
 			for(int i = 0; i < 4; ++i) rsv.push_back(si + i);
 			rsweep.clear(); rsweep.push_back(rsv);
 		}
 
 		// gen cells
-		if(PSTEPS == prog) rcells = vfaces;
+		if(PSTEPS <= prog) rcells = vfaces;
 		else if(0 < prog){
 			rcells.clear();
 			std::set<int> fids;
