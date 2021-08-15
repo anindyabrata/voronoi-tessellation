@@ -97,6 +97,7 @@ namespace ogview{
 			for(int i = 0; i < 4; ++i) rsv.push_back(si + i);
 			rsweep.clear(); rsweep.push_back(rsv);
 		}
+		else rsweep.clear();
 
 		// gen cells
 		if(PSTEPS <= prog) rcells = vfaces;
@@ -107,6 +108,7 @@ namespace ogview{
 				if(finy[i] <= y) for(auto fid: vfinds[i]) fids.insert(fid);
 			for(auto fid: fids) rcells.push_back(vfaces[fid]);
 		}
+		else rcells.clear();
 
 		// gen beach
 		if(0 < prog && PSTEPS > prog){
@@ -124,6 +126,7 @@ namespace ogview{
 				rbeach.push_back({r1, r2, 1 + r2});
 			}
 		}
+		else rbeach.clear();
 	}
 	const std::vector<float>& VoronoiViewable::getVertices(){
 		return rverts;
