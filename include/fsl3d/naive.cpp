@@ -32,10 +32,10 @@ namespace fsl3d{
 		for(int i = 0; i < site_list.size(); ++i) for(int j = 0; j < site_list.size(); ++j) if(i != j){
 			std::vector<int> cell;
 			auto old_cell = vor.cells[i];
-			std::vector<int> new_face;
+			std::vector<unsigned int> new_face;
 			for(auto old_face_vert: old_cell){
 				auto fid = vor.to_fid(i, old_face_vert);
-				std::vector<int> face;
+				std::vector<unsigned int> face;
 				auto intersect = vor.bisect_face(fid, i, j, face);
 				for(auto vi: intersect) new_face.push_back(vi);
 

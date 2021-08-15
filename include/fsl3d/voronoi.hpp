@@ -55,13 +55,24 @@ namespace fsl3d{
 			for(int i = 8 + site_count; i < vertices.size(); ++i) ret.push_back(vertices[i]);
 			return ret;
 		}
-		const std::vector<std::vector<int>> get_unique_faces() {
-			std::vector<std::vector<int>> ret;
+		const std::vector<std::vector<unsigned int>> get_unique_faces() {
+			std::vector<std::vector<unsigned int>> ret;
 			for(int i = 0; i < site_count; ++i) for(auto j: cells[i]) if(j < i) ret.push_back(faces[to_fid(j, i)]);
 			return ret;
 		}
-		const std::vector<std::vector<int>> get_cell_faces(int site_index) {
-			std::vector<std::vector<int>> ret;
+		const std::vector<std::vector<unsigned int>> get_unique_face_indices() {
+			int k = 0;
+			std::vector<std::vector<unsigned int>> ret;
+			for(int i = 0; i < site_count; ++i) ret.emplace_back();
+			for(int i = 0; i < site_count; ++i) for(auto j: cells[i]) if(j < i){
+				ret[i].push_back(k);
+				if(j >= 0) ret[j].push_back(k);
+				++k;
+			}
+			return ret;
+		}
+		const std::vector<std::vector<unsigned int>> get_cell_faces(int site_index) {
+			std::vector<std::vector<unsigned int>> ret;
 			for(auto i: cells[site_index]) ret.push_back(faces[to_fid(site_index, i)]);
 			return ret;
 		}
@@ -70,11 +81,11 @@ namespace fsl3d{
 			return a * site_count + b;
 		}
 		void from_fid(int fid, int &a, int &b) const{
-			a = fid / site_count;
-			b = fid % site_count;
+			a = fid / (int)site_count;
+			b = fid % (int)site_count;
 			if(b < 0){
 				--a;
-				b += site_count;
+				b += (int)site_count;
 			}
 		}
 		void sort_face(int fid){
@@ -106,12 +117,12 @@ namespace fsl3d{
 			// TODO: Remove duplicates? remove vertices next to each other that are too close to each other as long as face.size() > 3
 
 			// Replace face with sorted result
-			std::vector<int> sorted_face;
+			std::vector<unsigned int> sorted_face;
 			for(int k = 0; k < face.size(); ++k) sorted_face.push_back(face[sorder[k]]);
 			faces[fid] = sorted_face;
 		}
-		std::vector<int> bisect_face(int fid, int i, int j, std::vector<int> &face){
-			std::vector<int> intersect;
+		std::vector<unsigned int> bisect_face(int fid, int i, int j, std::vector<unsigned int> &face){
+			std::vector<unsigned int> intersect;
 			auto old_face = faces[fid];
 			std::vector<bool> closer;
 			for(auto verti: old_face) closer.push_back(CGAL::has_smaller_distance_to_point(vertices[verti], vertices[8 + i], vertices[8 + j]));
@@ -151,7 +162,7 @@ namespace fsl3d{
 		size_t site_count = 0;
 		scalar_type bb_min, bb_max;
 		std::vector<vertex_type> vertices;
-		std::map<int, std::vector<int>> faces;
+		std::map<int, std::vector<unsigned int>> faces;
 		std::vector<std::vector<int>> cells;
 	};
 }

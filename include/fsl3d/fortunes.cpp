@@ -47,14 +47,11 @@ namespace fsl3d{
 		
 		// Initialize empty beachline
 		std::set<int> beachline; // Sites whose cell is still not complete (not squeezed)
-		std::map<int, std::vector<int>> pending_faces; // Faces that are not confirmed; Does not contain impossible faces
+		std::map<int, std::vector<unsigned int>> pending_faces; // Faces that are not confirmed; Does not contain impossible faces
 		std::map<int, int> solid_vert_count; // Number of confirmed vertices in each face
 
 		// Initialize empty cells
-		for(int i = 0; i < site_list.size(); ++i){
-			vor.cells.emplace_back();//.push_back(std::vector<int>());
-			pending_faces[i] = std::vector<int>();
-		}
+		for(int i = 0; i < site_list.size(); ++i) vor.cells.emplace_back();
 
 		// Populate queue with site events
 		std::priority_queue<Event_type> q;
@@ -89,12 +86,12 @@ namespace fsl3d{
 				auto site = ev.ind;
 				// Bisect initial faces (bounding box)
 				for(auto beach_site: beachline){
-					std::vector<int> nface;
+					std::vector<unsigned int> nface;
 					auto &pasites = pending_faces[site];
-					std::vector<int> npasites;
+					std::vector<unsigned int> npasites;
 					for(auto pasite: pasites){
 						int fid = vor.to_fid(pasite, site);
-						std::vector<int> face;
+						std::vector<unsigned int> face;
 						auto intersect = vor.bisect_face(fid, beach_site, site, face);
 						vor.faces[fid] = face;
 						if(face.size()) npasites.push_back(pasite);
@@ -111,10 +108,10 @@ namespace fsl3d{
 				// Bisect beachline faces by site
 				for(auto beach_site: beachline){
 					auto &pasites = pending_faces[beach_site];
-					std::vector<int> npasites;
+					std::vector<unsigned int> npasites;
 					for(auto pasite: pasites) if(pasite < beach_site){
 						int fid = vor.to_fid(pasite, beach_site);
-						std::vector<int> face;
+						std::vector<unsigned int> face;
 						auto intersect = vor.bisect_face(fid, site, beach_site, face);
 						vor.faces[fid] = face;
 						if(face.size()) npasites.push_back(pasite);
