@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
+include(Sanitizers.cmake)
+
 project(cpp_fortunes_project LANGUAGES CXX)
 
 set(OpenGL_GL_PREFERENCE "GLVND")
