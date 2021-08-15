@@ -54,6 +54,7 @@ namespace ogview{
 				K::Line_3 ln(tp, K::Point_3(x, y - 1, z));
 				for(int site = 0; site < site_count; ++site){
 					int si = 8 + 3 * site;
+					if(vverts[1 + si] >= y) continue;
 					K::Point_3 sp(vverts[si], vverts[1 + si], vverts[2 + si]);
 					auto bplane = CGAL::bisector(tp, sp);
 					auto ires = CGAL::intersection(ln, bplane);
@@ -112,7 +113,7 @@ namespace ogview{
 
 		// gen beach
 		if(0 < prog && PSTEPS > prog){
-			int ivi = rverts.size();
+			int ivi = rverts.size() / 3;
 			for(int xs = 0; xs <= GSTEPS; ++xs) for(int zs = 0; zs <= GSTEPS; ++zs){
 				float x = (xs / (float)GSTEPS) * 2 * b - b;
 				float z = (zs / (float)GSTEPS) * 2 * b - b;
