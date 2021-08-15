@@ -30,7 +30,7 @@ namespace ogview{
 		private:
 		VoronoiViewable& vv;
 		GLFWwindow* window = NULL;
-		bool wireframe_mode = false;
+		bool wireframe_mode = false, playing = false;
 		GLuint site_prog, cell_prog, edge_prog, sweep_prog, beach_prog;
 		GLuint VAO, vertex_buffer;
 		linalg::aliases::float4x4 transform = linalg::identity;
@@ -172,7 +172,20 @@ namespace ogview{
 			initData();
 		}
 		float rtx = 0, rty = 0, rtz = 0;
+		bool ppressed = false, _0pressed = false, _1pressed = false;
 		void handleKeyboardEvents(){
+			// Handle progress
+			if (!ppressed && glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+				playing = !playing;
+			ppressed = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
+			if (!_0pressed && glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS)
+				playing = false, vv.setNoProgress();
+			_0pressed = glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS;
+			if (!_1pressed && glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+				playing = false, vv.setFullProgress();
+			_1pressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS;
+
+			// Handle rotation
 			float rotation_speed = 0.002;
 			if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 				glfwSetWindowShouldClose(window, true);
@@ -212,7 +225,7 @@ namespace ogview{
 				glfwPollEvents();
 				handleKeyboardEvents();
 
-				vv.setProgress(25);
+				if(playing) vv.increment();
 
 				// Dynamic draw
 				// Update dynamic vertices
