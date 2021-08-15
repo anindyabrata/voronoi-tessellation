@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <cassert>
 #include <vector>
 #include <array>
 #include <iostream>
@@ -13,10 +14,11 @@ namespace ogview{
 	class SimulationViewer{
 		public:
 		SimulationViewer(VoronoiViewable& _vv):vv(_vv){
-			// auto dverts = vv.getDynamicVertices();
-			// for(int i = 0; i < dverts.size(); i += 3) std::cout << dverts[i] << " " << dverts[i+1] << " " << dverts[i+2] << std::endl;
-			// auto dfaces = vv.getCompletedCellTris();
-			// for(int i = 0; i < dfaces.size(); ++i) std::cout << dfaces[i] << " "; std::cout << std::endl;
+			auto &dverts = vv.getVertices();
+			for(int i = 0; i < dverts.size(); i += 3) std::cout << dverts[i] << " " << dverts[i+1] << " " << dverts[i+2] << std::endl;
+			auto &dfaces = vv.getCells();
+			assert(0 < dfaces.size());
+			for(int i = 0; i < dfaces.size(); ++i) { for(int j = 0; j < dfaces[i].size(); ++j) std::cout << dfaces[i][j] << " "; std::cout << std::endl; }
 			init();
 		}
 		~SimulationViewer(){
@@ -182,21 +184,21 @@ namespace ogview{
 				// Dynamic draw
 				glBindVertexArray(VAO);
 				glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-				auto vertices = vv.getVertices();
+				auto &vertices = vv.getVertices();
 				glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_DYNAMIC_DRAW);
 				// glBufferSubData?
-				auto dfaces = vv.getCells();
+				auto &dfaces = vv.getCells();
 
 				// update dynamic vertices
 				// load faces (indices, face groups)
-				std::vector<std::array<unsigned int, 3>> faces;
-				for(int i = 0; i < dfaces.size(); i += 3) faces.push_back({dfaces[i], dfaces[i+1], dfaces[i+2]});
+				std::vector<std::vector<unsigned int>> faces;
+				for(int i = 0; i < dfaces.size(); ++i) faces.push_back(dfaces[i]);
 				// sort faces
 				linalg::aliases::float4 cpos = getTransformedCameraPos();
 				std::vector<float> dist;
 				for(auto face: faces){
 					float d = 0;
-					for(int i = 0; i < 3; ++i) {
+					for(int i = 0; i < face.size(); ++i) {
 						int vi = face[i];
 						float vf, dd = 0;
 						for(int j = 0; j < 3; ++j){
@@ -211,12 +213,16 @@ namespace ogview{
 				std::vector<int> face_order; for(int i = 0; i < faces.size(); ++i) face_order.push_back(i);
 				auto cmp = [dist](const int a, const int b) -> bool { return dist[a] > dist[b]; };
 				std::sort(face_order.begin(), face_order.end(), cmp);
+				assert(0 < face_order.size());
 				// show faces (if(face_group == 2) 
 				for(int fi: face_order){
+					assert(2 < faces[fi].size());
 					useProg(cell_tri_prog);
-					if(!wireframe_mode) glDrawElements(GL_TRIANGLES, 1 * 3, GL_UNSIGNED_INT, &faces[fi]);
+					// if(!wireframe_mode) glDrawElements(GL_TRIANGLE_STRIP, 1 * 3, GL_UNSIGNED_INT, &faces[fi]);
+					if(!wireframe_mode) glDrawElements(GL_TRIANGLE_STRIP, faces[fi].size(), GL_UNSIGNED_INT, faces[fi].data());
 					useProg(cell_edge_prog);
-					glDrawElements(GL_LINES, 1 * 3, GL_UNSIGNED_INT, &faces[fi]);
+					//glDrawElements(GL_LINE_LOOP, 1 * 3, GL_UNSIGNED_INT, &faces[fi]);
+					glDrawElements(GL_LINE_LOOP, faces[fi].size(), GL_UNSIGNED_INT, faces[fi].data());
 				}
 				glBindVertexArray(0);
 
