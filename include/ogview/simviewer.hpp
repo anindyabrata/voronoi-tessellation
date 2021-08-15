@@ -171,9 +171,13 @@ namespace ogview{
 
 			initData();
 		}
-		float rtx = 0, rty = 0, rtz = 0;
+		float rtx = -0.3, rty = 0.2, rtz = 0;
 		bool ppressed = false, _0pressed = false, _1pressed = false;
 		void handleKeyboardEvents(){
+			// Press ESC to close window
+			if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+				glfwSetWindowShouldClose(window, true);
+
 			// Handle progress
 			if (!ppressed && glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 				playing = !playing;
@@ -187,14 +191,21 @@ namespace ogview{
 
 			// Handle rotation
 			float rotation_speed = 0.002;
-			if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-				glfwSetWindowShouldClose(window, true);
-			if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+			if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+				rtx -= rotation_speed;
+			else if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
 				rtx += rotation_speed;
-			if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+			if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) && glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+				rty -= rotation_speed;
+			else if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
 				rty += rotation_speed;
-			if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+			if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) && glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+				rtz -= rotation_speed;
+			else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 				rtz += rotation_speed;
+			if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+				rtx = -0.3, rty = 0.2, rtz = 0;
+
 			// Apply rotation
 			transform = linalg::identity;
 			transform = linalg::mul(linalg::rotation_matrix<float>(linalg::rotation_quat({1, 0, 0}, rtx)), transform);
@@ -214,6 +225,7 @@ namespace ogview{
 				float tr[4*4]; for(int r = 4; r--;) for(int c = 4; c--; ) tr[r * 4 + c] = transform[r][c];
 				glUniformMatrix4fv(mulmatid, 1, GL_FALSE, tr);
 		}
+		int tick = 0;
 		void rend(){
 			while(!glfwWindowShouldClose(window))
 			{
@@ -225,7 +237,7 @@ namespace ogview{
 				glfwPollEvents();
 				handleKeyboardEvents();
 
-				if(playing) vv.increment();
+				if(playing && !(++tick & 31)) vv.increment();
 
 				// Dynamic draw
 				// Update dynamic vertices
