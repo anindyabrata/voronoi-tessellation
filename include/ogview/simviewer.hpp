@@ -129,8 +129,12 @@ namespace ogview{
 
 			// https://andersriggelsen.dk/glblendfunc.php
 			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-			glBlendEquation(GL_FUNC_SUBTRACT);
+			// glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			// glBlendEquation(GL_FUNC_SUBTRACT);
+			// glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE_MINUS_DST_COLOR);
+			// glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+			glBlendEquation(GL_FUNC_ADD);
 
 			initData();
 		}
@@ -181,7 +185,7 @@ namespace ogview{
 				auto vertices = vv.getVertices();
 				glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_DYNAMIC_DRAW);
 				// glBufferSubData?
-				auto dfaces = vv.getCompletedCellTris();
+				auto dfaces = vv.getCells();
 
 				// update dynamic vertices
 				// load faces (indices, face groups)
