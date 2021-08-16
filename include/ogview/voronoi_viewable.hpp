@@ -4,16 +4,17 @@
 
 #include <cmath>
 #include <vector>
+#include <CGAL/Cartesian.h>
 #include "fsl3d/voronoi.hpp"
 
 namespace ogview{
-		const size_t PSTEPS = 30; // Steps to full progress
-		const size_t GSTEPS = 20; // Density of beachline vertices
+	const size_t PSTEPS = 200;	// Steps to full progress
+	const size_t GSTEPS = 30;	// Density of beachline vertices
+	const float boundary = 0.5;	// Bounding box limits for viewer
 	class VoronoiViewable{
 	public:
 		VoronoiViewable();
 		VoronoiViewable(fsl3d::Voronoi&); // construct from actual data
-		void setBoundary(float bound = 0.5);
 		const std::vector<float>& getVertices();
 		const std::vector<unsigned int>& getSiteIndices();
 		const std::vector<std::vector<unsigned int>>& getCells();
@@ -28,9 +29,7 @@ namespace ogview{
 		std::vector<float> vverts, rverts, finy;
 		std::vector<unsigned int> rsinds;
 		std::vector<std::vector<unsigned int>> vfinds, vfaces, rcells, rsweep, rbeach;
-		float cbeach[PSTEPS][GSTEPS][GSTEPS];
-		float boundary = 0.5;
-		void triangulate(std::vector<unsigned int>&, std::vector<unsigned int>);
+		float cbeach[PSTEPS][1 + GSTEPS][1 + GSTEPS];
 	};
 }
 

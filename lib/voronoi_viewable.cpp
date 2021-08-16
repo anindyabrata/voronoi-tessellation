@@ -45,7 +45,7 @@ namespace ogview{
 		using K = CGAL::Cartesian<float>;
 		float b = boundary;
 		for(int ps = 1; ps < PSTEPS; ++ps) {
-			float y = (ps / (float)PSTEPS) * 2 * b - b;
+			float y = (2 * ps / (float)PSTEPS) * 2 * b - b;
 			for(int xs = 0; xs <= GSTEPS; ++xs) for(int zs = 0; zs <= GSTEPS; ++zs){
 				float x = (xs / (float)GSTEPS) * 2 * b - b;
 				float z = (zs / (float)GSTEPS) * 2 * b - b;
@@ -74,14 +74,14 @@ namespace ogview{
 		setProgress(0);
 	}
 	void VoronoiViewable::increment(){
-		setProgress((1 + progress) % (2 * PSTEPS));
+		setProgress((1 + progress) % (1 + PSTEPS));
 	}
 	void VoronoiViewable::setProgress(size_t prog){
 		if(prog == progress) return;
 		progress = prog;
 
 		float b = boundary;
-		float y = (prog / (float)PSTEPS) * 2 * b - b;
+		float y = (2 * prog / (float)PSTEPS) * 2 * b - b;
 
 		// gen verts
 		rverts = vverts;
