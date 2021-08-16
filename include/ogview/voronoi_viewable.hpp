@@ -8,7 +8,7 @@
 #include "fsl3d/voronoi.hpp"
 
 namespace ogview{
-	const size_t PSTEPS = 200;	// Steps to full progress
+	const size_t PSTEPS = 500;	// Steps to full progress
 	const size_t GSTEPS = 30;	// Density of beachline vertices
 	const float boundary = 0.5;	// Bounding box limits for viewer
 	class VoronoiViewable{
