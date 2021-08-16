@@ -17,11 +17,12 @@ namespace ogview{
 			// vv.setProgress(15);
 			// auto &dverts = vv.getVertices();
 			// for(int i = 0; i < dverts.size(); i += 3) std::cout << dverts[i] << " " << dverts[i+1] << " " << dverts[i+2] << std::endl;
-			// auto &dfaces = vv.getCells();
+			// auto &dfaces = vv.getBeachline();
 			// assert(0 < dfaces.size());
 			// for(int i = 0; i < dfaces.size(); ++i) { for(int j = 0; j < dfaces[i].size(); ++j) std::cout << dfaces[i][j] << " "; std::cout << std::endl; }
 			// auto &sface = vv.getSweepline()[0];
 			// for(int i = 0; i < sface.size(); ++i) std::cout << sface[i] << " "; std::cout << std::endl;
+			// std::cout << "#Verts = " << dverts.size() << std::endl;
 			init();
 		}
 		~SimulationViewer(){
@@ -67,7 +68,7 @@ namespace ogview{
 				 out vec4 FragColor;
 				 void main()
 				 {
-				 FragColor = vec4(0.6, 1.0, 1.0, 0.1);
+				 FragColor = vec4(0.6, 1.0, 1.0, 0.03);
 				 }
 				);
 			const char* edge_frag_shader = GLSL
@@ -76,7 +77,7 @@ namespace ogview{
 				 out vec4 FragColor;
 				 void main()
 				 {
-				 FragColor = vec4(0.3, 0.3, 0.9, 0.9);
+				 FragColor = vec4(0.2, 0.2, 0.7, 0.9);
 				 }
 				);
 
@@ -96,7 +97,7 @@ namespace ogview{
 				 out vec4 FragColor;
 				 void main()
 				 {
-				 FragColor = vec4(0.2, 0.8, 0.2, 0.1);
+				 FragColor = vec4(0.2, 0.8, 0.4, 0.1);
 				 }
 				);
 
@@ -174,7 +175,7 @@ namespace ogview{
 
 			initData();
 		}
-		float rtx = -0.3, rty = 0.2, rtz = 0;
+		float rtx = -0.7, rty = 0.9, rtz = -0.55;
 		bool ppressed = false, _0pressed = false, _1pressed = false;
 		bool wpressed = false;
 		void handleKeyboardEvents(){
@@ -213,7 +214,7 @@ namespace ogview{
 			else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 				rtz += rotation_speed;
 			if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-				rtx = -0.3, rty = 0.2, rtz = 0;
+				rtx = -0.7, rty = 0.9, rtz = -0.55;
 
 			// Apply rotation
 			transform = linalg::identity;
@@ -246,7 +247,8 @@ namespace ogview{
 				glfwPollEvents();
 				handleKeyboardEvents();
 
-				if(playing && !(++tick & 63)) vv.increment();
+				int playmask = 1 << 3 - 1;
+				if(playing && !(++tick & playmask)) vv.increment();
 
 				// Dynamic draw
 				// Update dynamic vertices
