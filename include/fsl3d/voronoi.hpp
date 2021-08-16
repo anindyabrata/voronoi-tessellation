@@ -52,6 +52,7 @@ namespace fsl3d{
 		}
 		const std::vector<vertex_type> get_cell_vertices() const{
 			std::vector<vertex_type> ret;
+			for(int i = 0; i < 8; ++i) ret.push_back(vertices[i]);
 			for(int i = 8 + site_count; i < vertices.size(); ++i) ret.push_back(vertices[i]);
 			return ret;
 		}
@@ -100,7 +101,6 @@ namespace fsl3d{
 
 			// Find center of 2D points
 			K::FT mdx = twod[0].x(), mdy = twod[0].y();
-			// K::Point_2 md(twod[0]);
 			for(int k = 1; k < face.size(); ++k) mdx += twod[k].x(), mdy += twod[k].y();
 			mdx /= face.size(), mdy /= face.size();
 
@@ -158,7 +158,6 @@ namespace fsl3d{
 			// Return list of intersecting vertices
 			return intersect;
 		}
-	// private: // commented out for testing
 		size_t site_count = 0;
 		scalar_type bb_min, bb_max;
 		std::vector<vertex_type> vertices;

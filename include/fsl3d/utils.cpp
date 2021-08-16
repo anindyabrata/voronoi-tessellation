@@ -46,8 +46,10 @@ namespace fsl3d::utils{
 			std::cout << faces.size() << std::endl;						// F: number of faces in cell
 			for(auto face: faces){
 				std::cout << face.size();								// VF: number of vertices in face
-				for(auto index: face)
-					std::cout << " " << index - 8 - sites.size();		// index to vertex
+				for(auto index: face){
+					index = index < 8? index: index - sites.size();
+					std::cout << " " << index;							// index to vertex
+				}
 				std::cout << std::endl;
 			}
 		}
