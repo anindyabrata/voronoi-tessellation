@@ -5,20 +5,20 @@ Random input:
 	The generate_input target is provided for convenience
 	This program reads a single integer N from standard input
 	It writes N random vertices to output
-	The output of this program can be used as input for demo
+	The output of this program can be used as input for the program
 
 Keyboard controls for simulation:
-	p: Play/Pause simulation
-	0: Set simulation progress to beginning
-	1: Set simulation progress to ended
-	w: Wireframe mode (hides cell faces)
-	r: Reset rotation
-	z: Rotate around Z axis
-	x: Rotate around X axis
-	c: Rotate around Y axis
-	RSHIFT + z: Reverse rotate around Z axis
-	RSHIFT + x: Reverse rotate around X axis
-	RSHIFT + c: Reverse rotate around Y axis
+	p:			Play/Pause simulation
+	0:			Set simulation progress to beginning
+	1:			Set simulation progress to ended
+	w:			Wireframe mode (hides cell faces)
+	r:			Reset rotation
+	z:			Rotate around Z axis
+	x:			Rotate around X axis
+	c:			Rotate around Y axis
+	RSHIFT + z:	Reverse rotate around Z axis
+	RSHIFT + x:	Reverse rotate around X axis
+	RSHIFT + c:	Reverse rotate around Y axis
 
 Input:
 	At least two site vertices must be provided as input
