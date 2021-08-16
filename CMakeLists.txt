@@ -30,7 +30,7 @@ target_link_libraries(main ${GLFW_LIBRARIES} ${GLEW_LIBRARIES}
 add_executable(generate_input app/rand_input.cpp)
 
 install(FILES sample_input.txt DESTINATION bin)
-install(FILES demo DESTINATION bin)
+install(PROGRAMS demo DESTINATION bin)
 install(TARGETS main DESTINATION bin)
 install(TARGETS generate_input DESTINATION bin)
 
