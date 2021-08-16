@@ -21,11 +21,15 @@ include_directories(include)
 include_directories(external)
 
 add_executable(main app/main.cpp lib/voronoi_viewable.cpp)
+add_executable(test app/test.cpp lib/voronoi_viewable.cpp)
 
 target_include_directories(main PUBLIC ${GLFW_INCLUDE_DIRS}
  	${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${CGAL_INCLUDE_DIRS})
 target_link_libraries(main ${GLFW_LIBRARIES} ${GLEW_LIBRARIES}
  	${OPENGL_LIBRARIES} ${CGAL_LIBRARY} ${GMP_LIBRARIES})
+
+target_include_directories(test PUBLIC ${CGAL_INCLUDE_DIRS})
+target_link_libraries(test ${CGAL_LIBRARY} ${GMP_LIBRARIES})
 
 add_executable(generate_input app/rand_input.cpp)
 
