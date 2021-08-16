@@ -5,6 +5,10 @@
 #include "fsl3d/common.hpp"
 
 namespace fsl3d{
+
+	// Use naive algorithm for generating voronoi diagram
+	// Takes each pair of sites and reduces their cells
+	// starting from the entire bounding box for each site
 	Voronoi generate_naive_voronoi(std::vector<vertex_type> site_list){
 		Voronoi vor(site_list);
 

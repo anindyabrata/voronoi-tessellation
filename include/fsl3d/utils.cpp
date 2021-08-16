@@ -11,18 +11,29 @@
 #include "fsl3d/voronoi.hpp"
 
 namespace fsl3d::utils{
+
+	// Exit the program and display error message s
 	void exit_with_message(const char *s){
 		std::cerr << "Aborting" << std::endl;
 		std::cerr << s << std::endl;
 		std::exit(EXIT_FAILURE);
 	}
+
+	// Check if two vertices are too close to each other
 	bool p_equal(const vertex_type &a, const vertex_type &b){
 		return CGAL::squared_distance(a, b) < EPS * EPS;
 	}
+
+	// Read site list from standard input
+	// Validate input (number of vertices and duplicates)
 	std::vector<vertex_type> read_site_list(){
+
+		// Read from standard input
 		std::istream_iterator<vertex_type> ibegin(std::cin);
 		std::istream_iterator<vertex_type> iend;
 		std::vector<vertex_type> ret(ibegin, iend);
+
+		// Validate input
 		if(ret.size() < 2){
 			exit_with_message("At least 2 sites required as input");
 		}
@@ -34,6 +45,8 @@ namespace fsl3d::utils{
 		}
 		return ret;
 	}
+
+	// Write description of voronoi diagram to output
 	void write_voronoi(Voronoi &vor){
 		auto sites = vor.get_site_vertices();
 		std::cout << sites.size() << std::endl;							// S: number of sites
@@ -54,9 +67,15 @@ namespace fsl3d::utils{
 			}
 		}
 	}
+
+	// Check if two voronoi diagrams generated from the same site list
+	// are equal
+	// Precondition: Must be generated from the same sites in same order 
 	bool are_voronois_equal(Voronoi &a, Voronoi &b){
 		if(a.site_count != b.site_count) return false;
+		auto as = a.get_site_vertices(), bs = b.get_site_vertices();
 		for(int si = 0; si < a.site_count; ++si){
+			if(!p_equal(as[si], bs[si])) return false;
 			auto ac = a.cells[si], bc = b.cells[si];
 			std::sort(ac.begin(), ac.end());
 			std::sort(bc.begin(), bc.end());

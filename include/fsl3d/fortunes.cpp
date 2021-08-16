@@ -7,6 +7,8 @@
 #include "fsl3d/common.hpp"
 
 namespace fsl3d{
+
+	// Class used to represent site and intersection events used by fortune's algorithm
 	class Event_type{
 	public:
 		// Site event constructor
@@ -42,6 +44,8 @@ namespace fsl3d{
 		}
 	};
 
+	// Generates voronoi diagram of sites in site_list using a version of fortune's algorithm
+	// Sweep line progresses from -ve Y to +ve Y direction
 	Voronoi generate_fortunes_voronoi(std::vector<vertex_type> site_list){
 		Voronoi vor(site_list);
 		

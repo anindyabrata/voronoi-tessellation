@@ -2,9 +2,12 @@
 #include "ogview/voronoi_viewable.hpp"
 
 namespace ogview{
+
 	float sqr(float f){
 		return f * f;
 	}
+
+	// Returns squared euclidean distance between two vertices
 	float sq_dist(std::vector<float> vverts, int i, int j){
 		i *= 3;
 		j *= 3;
@@ -12,8 +15,9 @@ namespace ogview{
 		for(int k = 3; k--; ++i, ++j) ret += sqr(vverts[i] - vverts[j]);
 		return ret;
 	}
-	VoronoiViewable::VoronoiViewable(){
-	}
+
+	// Constructs viewable object and sets state to simulation end
+	// The parameter voronoi object is no longer used after construction
 	VoronoiViewable::VoronoiViewable(fsl3d::Voronoi &vor){
 		// Save float copy of voronoi obj, not the actual obj
 		site_count = vor.site_count;
@@ -67,30 +71,40 @@ namespace ogview{
 
 		setFullProgress();
 	}
+
+	// Set progress to simulation end
 	void VoronoiViewable::setFullProgress(){
 		setProgress(PSTEPS);
 	}
+
+	// Set progress to simulation beginning
 	void VoronoiViewable::setNoProgress(){
 		setProgress(0);
 	}
+
+	// Set progress to next simulation step and wrap around
 	void VoronoiViewable::increment(){
 		setProgress((1 + progress) % (1 + PSTEPS));
 	}
+
+	// Set progress to step prog
+	// Generates and saves data in a format usable by openGL
 	void VoronoiViewable::setProgress(size_t prog){
+		if(prog > PSTEPS) prog = PSTEPS;
 		if(prog == progress) return;
 		progress = prog;
 
 		float b = boundary;
-		float y = (2 * prog / (float)PSTEPS) * 2 * b - b;
+		float y = (2 * prog / (float)PSTEPS) * 2 * b - b; // y value of sweepline at current progress step
 
-		// gen verts
+		// Generate vertices
 		rverts = vverts;
 
-		// gen sites
+		// Generate site indices
 		rsinds.clear();
 		for(int i = 0; i < site_count; ++i) rsinds.push_back((8 + i));
 
-		// gen sweep
+		// Generate sweepline vertices and faces
 		if(prog > 0 && prog < PSTEPS){
 			int si = rverts.size() / 3;
 			for(float v: {-b, y, -b, -b, y, b, b, y, b, b, y, -b}) rverts.push_back(v);
@@ -100,7 +114,7 @@ namespace ogview{
 		}
 		else rsweep.clear();
 
-		// gen cells
+		// Generate cell faces
 		if(PSTEPS <= prog) rcells = vfaces;
 		else if(0 < prog){
 			rcells.clear();
@@ -111,7 +125,7 @@ namespace ogview{
 		}
 		else rcells.clear();
 
-		// gen beach
+		// Generate beachline faces
 		if(0 < prog && PSTEPS > prog){
 			int ivi = rverts.size() / 3;
 			for(int xs = 0; xs <= GSTEPS; ++xs) for(int zs = 0; zs <= GSTEPS; ++zs){
@@ -129,18 +143,28 @@ namespace ogview{
 		}
 		else rbeach.clear();
 	}
+
+	// Get flattened euclidean vertex data
 	const std::vector<float>& VoronoiViewable::getVertices(){
 		return rverts;
 	}
+
+	// Get index to site vertices
 	const std::vector<unsigned int>& VoronoiViewable::getSiteIndices(){
 		return rsinds;
 	}
+
+	// Get cell faces
 	const std::vector<std::vector<unsigned int>>& VoronoiViewable::getCells(){
 		return rcells;
 	}
+
+	// Get sweepline faces
 	const std::vector<std::vector<unsigned int>>& VoronoiViewable::getSweepline(){
 		return rsweep;
 	}
+
+	// Get beachline faces
 	const std::vector<std::vector<unsigned int>>& VoronoiViewable::getBeachline(){
 		return rbeach;
 	}

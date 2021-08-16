@@ -36,6 +36,7 @@ add_executable(generate_input app/rand_input.cpp)
 install(FILES sample_input.txt DESTINATION bin)
 install(PROGRAMS demo DESTINATION bin)
 install(TARGETS main DESTINATION bin)
+install(TARGETS test DESTINATION bin)
 install(TARGETS generate_input DESTINATION bin)
 
 
