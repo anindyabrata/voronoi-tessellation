@@ -20,15 +20,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")
 include_directories(include)
 include_directories(external)
 
+add_executable(demo app/main.cpp lib/voronoi_viewable.cpp)
 
+target_include_directories(demo PUBLIC ${GLFW_INCLUDE_DIRS}
+ 	${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${CGAL_INCLUDE_DIRS})
+target_link_libraries(demo ${GLFW_LIBRARIES} ${GLEW_LIBRARIES}
+ 	${OPENGL_LIBRARIES} ${CGAL_LIBRARY} ${GMP_LIBRARIES})
 
+add_executable(generate_input app/rand_input.cpp)
 
-#add_executable(devmain app/devmain.cpp test/voronoi_viewable.cpp)
-add_executable(devmain app/devmain.cpp lib/voronoi_viewable.cpp)
-
-target_include_directories(devmain PUBLIC ${GLFW_INCLUDE_DIRS}
-	${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${CGAL_INCLUDE_DIRS})
-target_link_libraries(devmain ${GLFW_LIBRARIES} ${GLEW_LIBRARIES}
-	${OPENGL_LIBRARIES} ${CGAL_LIBRARY} ${GMP_LIBRARIES})
+install(TARGETS demo DESTINATION bin)
+install(TARGETS generate_input DESTINATION bin)
 
 
