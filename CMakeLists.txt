@@ -13,15 +13,14 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 
 set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE)
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")
-
 
 include_directories(include)
 include_directories(external)
 
-add_executable(main app/main.cpp lib/voronoi_viewable.cpp)
-add_executable(test app/test.cpp lib/voronoi_viewable.cpp)
+add_executable(main				app/main.cpp lib/voronoi_viewable.cpp)
+add_executable(test				app/test.cpp lib/voronoi_viewable.cpp)
+add_executable(generate_input	app/rand_input.cpp)
 
 target_include_directories(main PUBLIC ${GLFW_INCLUDE_DIRS}
  	${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${CGAL_INCLUDE_DIRS})
@@ -30,8 +29,6 @@ target_link_libraries(main ${GLFW_LIBRARIES} ${GLEW_LIBRARIES}
 
 target_include_directories(test PUBLIC ${CGAL_INCLUDE_DIRS})
 target_link_libraries(test ${CGAL_LIBRARY} ${GMP_LIBRARIES})
-
-add_executable(generate_input app/rand_input.cpp)
 
 install(FILES sample_input.txt DESTINATION bin)
 install(PROGRAMS demo DESTINATION bin)
