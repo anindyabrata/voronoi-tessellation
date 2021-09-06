@@ -191,7 +191,8 @@ namespace ogview{
 		}
 
 		// Keyboard input and rotation parameters
-		float rtx = -0.7, rty = 0.9, rtz = -0.55;
+		float drtx = -0.5, drty = 0.5, drtz = 0;
+		float rtx = drtx, rty = drty, rtz = drtz;
 		bool ppressed = false, _0pressed = false, _1pressed = false;
 		bool wpressed = false;
 
@@ -232,13 +233,13 @@ namespace ogview{
 			else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 				rtz += rotation_speed;
 			if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-				rtx = -0.7, rty = 0.9, rtz = -0.55;
+				rtx = drtx, rty = drty, rtz = drtz;
 
 			// Apply rotation
 			// Uses external linalg library for matrix operations
 			transform = linalg::identity;
-			transform = linalg::mul(linalg::rotation_matrix<float>(linalg::rotation_quat({1, 0, 0}, rtx)), transform);
 			transform = linalg::mul(linalg::rotation_matrix<float>(linalg::rotation_quat({0, 1, 0}, rty)), transform);
+			transform = linalg::mul(linalg::rotation_matrix<float>(linalg::rotation_quat({1, 0, 0}, rtx)), transform);
 			transform = linalg::mul(linalg::rotation_matrix<float>(linalg::rotation_quat({0, 0, 1}, rtz)), transform);
 		}
 
