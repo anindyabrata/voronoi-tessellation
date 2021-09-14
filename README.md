@@ -3,7 +3,7 @@ Voronoi tessellation using Fortune's algorithm in 3D
 https://user-images.githubusercontent.com/46318969/133182540-fbe4672f-c9e5-4062-bd31-f40a74eee674.mp4
 
 The program reads from standard input, displays a visual simulation of fortune's algorithm and upon closing
-the window, writes a description of the diagram to the standard output.
+the window, writes a description of the diagram to the standard output. Submitted as UVic's ECE 596C Sep2021 course project.
 
 ## Installation
 Use cmake to install targets specified in the CMakeLists.txt file
