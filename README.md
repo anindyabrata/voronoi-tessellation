@@ -5,6 +5,9 @@ https://user-images.githubusercontent.com/46318969/133182540-fbe4672f-c9e5-4062-
 The program reads from standard input, displays a visual simulation of fortune's algorithm and upon closing
 the window, writes a description of the diagram to the standard output. Submitted as UVic's ECE 596C Sep2021 course project.
 
+## Dependencies
+Boost, CGAL, GLFW, OpenGL, and GLEW must be installed on the system where cmake can find them
+
 ## Installation
 Use cmake to install targets specified in the CMakeLists.txt file
 
@@ -51,6 +54,10 @@ itself corresponding to the number of faces describing that particular cell. The
 separated integers. The first integer in this line is VF (the number of vertices that make up the polygonal
 face). VF more integers are given on the same line corresponding to the index of (V) vertices provided
 earlier.
+
+## Limitations
+Since the project was made in a short time, the intersection detection data structure for Fortune's algorithm
+was not implemented.
 
 ## Random input generation
 The generate_input target is provided for convenience. This program reads a single integer N from standard input and writes N random vertices to output. One point in each line. The output of this program can be used as input for the main program.
